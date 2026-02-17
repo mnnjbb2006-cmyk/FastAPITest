@@ -21,7 +21,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. Run the app with Uvicorn:
+3. Run the app with fastapi:
 
 ```bash
 fastapi dev main.py
