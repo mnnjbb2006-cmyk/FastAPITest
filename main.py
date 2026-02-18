@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from typing import List, Annotated, Optional
+from typing import List, Annotated, Optional, Dict
 from pydantic import BaseModel, Field
 
 
@@ -63,19 +63,19 @@ books = [
     Book(book_id=19, title='Saxon Math', author='Stephen Hake',
          year=2003, publisher='Saxon Pub')
 ]
-poped_ids = []
+poped_ids: List[int] = []
 
 api = FastAPI()
 
 
-@api.get("/", response_model=List[Book])
-def find_books(q: Annotated[str, Field(min_length=3, max_length=100)]) -> List[Book]:
+@api.get("/")
+def find_books(q: Annotated[str, Field(min_length=3, max_length=100)]) -> Dict:
     q_lower = q.lower()
     fbooks: List[Book] = []
     for book in books:
         if q_lower in book.title.lower() or q_lower in book.author.lower():
             fbooks.append(book)
-    return fbooks
+    return {"books": fbooks}
 
 
 @api.put("/update/{book_id}", response_model=Book)
