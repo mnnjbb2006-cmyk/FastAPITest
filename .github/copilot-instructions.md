@@ -4,6 +4,57 @@ Short instructions to help an AI agent become productive in this repository quic
 
 ## Big picture
 
+- Single-file FastAPI service in `main.py`. The ASGI app is named `api` (not `app`).
+- Data is in-memory: `books` is a list of Pydantic `Book` instances (no DB, no background workers).
+- Current public routes of interest:
+  - GET `/` — query param `q` (Annotated, min_length=3); returns List[Book] (response_model).
+  - PUT `/update/{book_id}` — updates a book by its `book_id` and returns the updated `Book`.
+
+## Key files
+
+- `main.py` — FastAPI app, Pydantic models (`Book`, `BookUpdate`), and the in-memory `books` list.
+- `README.md` — quick-start and the recommended dev run command.
+- `requirements.txt` — dependency manifest (uses `fastapi` and `fastapi[standard]`).
+
+## How to run (project-specific)
+
+Follow `README.md`. Short checklist:
+- Create/activate venv: `python -m venv .venv && source .venv/bin/activate`
+- Install deps: `pip install -r requirements.txt`
+- Dev server (recommended): `fastapi dev main.py` (OpenAPI at `/docs`)
+- Alternative: `uvicorn main:api --reload --port 8000` (note `main:api`).
+
+## Project-specific conventions
+
+- Attach new endpoints to `api` (e.g. `@api.get(...)`).
+- Prefer using the existing Pydantic models and `response_model` for endpoints. `Book` and `BookUpdate` are defined in `main.py`.
+- `book_id` is the stable identifier used by the update endpoint; do not treat Python list index as the id.
+- Request validation uses `Annotated` + `Field` constraints (e.g. `q` min_length and `year` range). Preserve these constraints when adding params.
+- Data is mutable in-memory: changes are ephemeral and lost on restart — useful for local testing only.
+
+## Editing hints with examples
+
+- Add a simple publishers endpoint:
+  - `@api.get('/publishers', response_model=List[str])` and return a deduplicated list from `books`.
+- When adding/updating routes that change response shapes, update `README.md` or mention breaking changes in the PR.
+- Example: safely update a book by id (pattern used in `main.py`): iterate `books`, match `b.book_id == book_id`, apply non-None fields from `BookUpdate` and return the `Book`.
+
+## What is NOT present
+
+- No tests, no CI, no Dockerfile, no structured logging/tracing. Expect manual local development.
+
+## Where to look for more context
+
+- `main.py` — canonical source for API behavior and data.
+- `README.md` — run instructions and example query usage.
+
+If you'd like I can expand this with: a tiny pytest harness for the endpoints, a sample `docker-compose` or a minimal CI workflow. Tell me which and I'll add it.
+## Purpose
+
+Short instructions to help an AI agent become productive in this repository quickly.
+
+## Big picture
+
 - This is a very small FastAPI service implemented entirely in `main.py`.
 - The app instance is named `api` (not the common `app`). New endpoints should attach to `api`.
 - Data is in-memory: `books` is a list of plain Python dicts defined in `main.py`. There is no database, background workers, or external services.

@@ -11,6 +11,12 @@ class BookBase(BaseModel):
 class Book(BookBase):
     book_id: int
 
+class BookUpdate(BaseModel):
+    title: Optional[Annotated[str, Field(min_length=3, max_length=100)]] = None
+    author: Optional[Annotated[str, Field(min_length=3, max_length=100)]] = None
+    year: Optional[Annotated[int, Field(min=1000, max=2026)]] = None
+    publisher: Optional[Annotated[str, Field(min_length=3, max_length=100)]] = None
+
 books = [
     Book(book_id=1, title='Weapons of Math Destruction', author="Cathy O'Neil", year=2016, publisher='Penguin Books, Limited'),
     Book(book_id=2, title='Saxon Math 8/7', author='Stephen Hake', year=2003, publisher='Saxon Publishers, Incorporated'),
@@ -45,3 +51,18 @@ def find_books(q: Annotated[str, Field(min_length=3, max_length=100)]) -> List[B
         if q_lower in book.title.lower() or q_lower in book.author.lower():
             fbooks.append(book)
     return fbooks
+
+@api.put("/update/{book_id}", response_model=Book)
+def update_book(book_id: int, book: BookUpdate) -> Book:
+    for b in books:
+        if b.book_id == book_id:
+            if book.title is not None:
+                b.title = book.title
+            if book.author is not None:
+                b.author = book.author
+            if book.year is not None:
+                b.year = book.year
+            if book.publisher is not None:
+                b.publisher = book.publisher
+            return b
+    raise HTTPException(status_code=404, detail="Book not found")
