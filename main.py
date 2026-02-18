@@ -94,8 +94,8 @@ def update_book(book_id: int, book: BookUpdate) -> Book:
     raise HTTPException(status_code=404, detail="Book not found")
 
 
-@api.post("/create/", response_model=BookBase)
-def create_book(book: BookBase) -> BookBase:
+@api.post("/add/", response_model=Book)
+def add_book(book: BookBase) -> Book:
     book_id = len(books) + 1
     for i in poped_ids:
         book_id = min(book_id, i)
@@ -103,3 +103,13 @@ def create_book(book: BookBase) -> BookBase:
                     author=book.author, year=book.year, publisher=book.publisher)
     books.append(new_book)
     return new_book
+
+
+@api.delete("/delete/{book_id}")
+def delete_book(book_id: int) -> dict:
+    for i, book in enumerate(books):
+        if book.book_id == book_id:
+            poped_ids.append(book_id)
+            books.pop(i)
+            return {"message": f"delete completed"}
+    raise HTTPException(status_code=404, detail="Book not found")
