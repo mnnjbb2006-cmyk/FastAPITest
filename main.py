@@ -223,5 +223,5 @@ def update_cover(book_id: int, cover_image: UploadFile) -> dict:
                with open(coverPath, "wb") as f:
                     f.write(cover_image.file.read())
                book.coverPath = coverPath
-               return {"message": "Cover image added/updated"}
+               return {"message": cover_image.filename}
      raise HTTPException(status_code=404, detail="Book not found")
